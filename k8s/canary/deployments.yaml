@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: YOUR_DOCKERHUB_USER/aceest-fitness:1.0.0
+          image: yamunahegade/aceest-fitness:1.0.0
           ports: [{ containerPort: 5000 }]
           readinessProbe: { httpGet: { path: /health, port: 5000 } }
 ---
@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: YOUR_DOCKERHUB_USER/aceest-fitness:1.1.0
+          image: yamunahegade/aceest-fitness:1.1.0
           ports: [{ containerPort: 5000 }]
           readinessProbe: { httpGet: { path: /health, port: 5000 } }
 ---

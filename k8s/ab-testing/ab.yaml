@@ -10,7 +10,7 @@ spec:
     metadata: { labels: { app: aceest-ab, variant: a } }
     spec:
       containers:
-        - { name: app, image: "YOUR_DOCKERHUB_USER/aceest-fitness:1.0.0", ports: [{ containerPort: 5000 }] }
+        - { name: app, image: "yamunahegade/aceest-fitness:1.0.0", ports: [{ containerPort: 5000 }] }
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -22,7 +22,7 @@ spec:
     metadata: { labels: { app: aceest-ab, variant: b } }
     spec:
       containers:
-        - { name: app, image: "YOUR_DOCKERHUB_USER/aceest-fitness:1.1.0", ports: [{ containerPort: 5000 }] }
+        - { name: app, image: "yamunahegade/aceest-fitness:1.1.0", ports: [{ containerPort: 5000 }] }
 ---
 apiVersion: v1
 kind: Service

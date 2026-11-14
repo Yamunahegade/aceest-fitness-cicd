@@ -4,7 +4,7 @@ pipeline {
   agent any
   triggers { pollSCM('H/2 * * * *') }   // poll GitHub every ~2 min (or use a webhook)
   environment {
-    IMAGE   = "YOUR_DOCKERHUB_USER/aceest-fitness"
+    IMAGE   = "yamunahegade/aceest-fitness"
     VERSION = "${env.TAG_NAME ?: "1.0.${env.BUILD_NUMBER}"}"
     KUBECONFIG = credentials('kubeconfig')
   }
