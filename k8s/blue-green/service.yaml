@@ -1,0 +1,10 @@
+# Live traffic goes to whichever slot is selected. Switch / roll back with:
+#   kubectl patch svc aceest-bg-svc -p '{"spec":{"selector":{"app":"aceest-bg","slot":"green"}}}'
+#   kubectl patch svc aceest-bg-svc -p '{"spec":{"selector":{"app":"aceest-bg","slot":"blue"}}}'   # rollback
+apiVersion: v1
+kind: Service
+metadata: { name: aceest-bg-svc }
+spec:
+  type: NodePort
+  selector: { app: aceest-bg, slot: blue }
+  ports: [{ port: 80, targetPort: 5000 }]

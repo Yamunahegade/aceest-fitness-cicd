@@ -1,0 +1,58 @@
+# Requires: minikube addons enable ingress
+# Requests with header "X-Variant: B" get version B; everyone else gets version A.
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: aceest-a }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: aceest-ab, variant: a } }
+  template:
+    metadata: { labels: { app: aceest-ab, variant: a } }
+    spec:
+      containers:
+        - { name: app, image: "YOUR_DOCKERHUB_USER/aceest-fitness:1.0.0", ports: [{ containerPort: 5000 }] }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: aceest-b }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: aceest-ab, variant: b } }
+  template:
+    metadata: { labels: { app: aceest-ab, variant: b } }
+    spec:
+      containers:
+        - { name: app, image: "YOUR_DOCKERHUB_USER/aceest-fitness:1.1.0", ports: [{ containerPort: 5000 }] }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: aceest-a-svc }
+spec: { selector: { app: aceest-ab, variant: a }, ports: [{ port: 80, targetPort: 5000 }] }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: aceest-b-svc }
+spec: { selector: { app: aceest-ab, variant: b }, ports: [{ port: 80, targetPort: 5000 }] }
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata: { name: aceest-ab-primary }
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: aceest.local
+      http: { paths: [{ path: /, pathType: Prefix, backend: { service: { name: aceest-a-svc, port: { number: 80 } } } }] }
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aceest-ab-variant-b
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-by-header: "X-Variant"
+    nginx.ingress.kubernetes.io/canary-by-header-value: "B"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: aceest.local
+      http: { paths: [{ path: /, pathType: Prefix, backend: { service: { name: aceest-b-svc, port: { number: 80 } } } }] }
