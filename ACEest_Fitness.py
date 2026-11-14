@@ -6,7 +6,7 @@ Assignment 1 code base (workouts, members, programs, BMI, etc.).
 import os
 from flask import Flask, jsonify, request
 
-VERSION = os.environ.get("APP_VERSION", "1.0.0")
+VERSION = os.environ.get("APP_VERSION", "1.1.0")
 
 PROGRAMS = {
     "Fat Loss (FL)": {"workout": "Back Squat, Cardio, Bench, Deadlift", "calorie_factor": 22},
