@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: yamunahegade/aceest-fitness:1.0.0
+          image: yamunahegade/aceest-fitness:1.0.4
           ports: [{ containerPort: 5000 }]
           readinessProbe: { httpGet: { path: /health, port: 5000 }, initialDelaySeconds: 3, periodSeconds: 5 }
           livenessProbe:  { httpGet: { path: /health, port: 5000 }, initialDelaySeconds: 10, periodSeconds: 10 }

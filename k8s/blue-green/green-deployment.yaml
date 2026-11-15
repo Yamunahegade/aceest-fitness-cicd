@@ -9,6 +9,6 @@ spec:
     spec:
       containers:
         - name: app
-          image: yamunahegade/aceest-fitness:1.1.0
+          image: yamunahegade/aceest-fitness:1.0.5
           ports: [{ containerPort: 5000 }]
           readinessProbe: { httpGet: { path: /health, port: 5000 } }
