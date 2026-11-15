@@ -1,5 +1,7 @@
-# Requires Istio: istioctl install --set profile=demo -y ; kubectl label ns default istio-injection=enabled
-# Live traffic -> v1 ; a mirrored copy (responses discarded) -> v2
+# SHADOW DEPLOYMENT using the NGINX ingress (minikube addons enable ingress).
+# Real traffic -> v1 (answers the caller). A mirrored copy of every request is
+# sent to v2 (answer discarded), so v2 is tested with live traffic, zero user risk.
+# Change the image tags to your Jenkins-built versions if they differ.
 apiVersion: apps/v1
 kind: Deployment
 metadata: { name: aceest-v1 }
@@ -11,8 +13,10 @@ spec:
     spec:
       containers:
         - name: app
-          image: yamunahegade/aceest-fitness:1.0.0
+          image: yamunahegade/aceest-fitness:1.0.4
           ports: [{ containerPort: 5000 }]
+          env: [{ name: GUNICORN_CMD_ARGS, value: "--access-logfile -" }]
+          readinessProbe: { httpGet: { path: /health, port: 5000 } }
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -25,31 +29,34 @@ spec:
     spec:
       containers:
         - name: app
-          image: yamunahegade/aceest-fitness:1.1.0
+          image: yamunahegade/aceest-fitness:1.0.5
           ports: [{ containerPort: 5000 }]
+          env: [{ name: GUNICORN_CMD_ARGS, value: "--access-logfile -" }]
+          readinessProbe: { httpGet: { path: /health, port: 5000 } }
 ---
 apiVersion: v1
 kind: Service
-metadata: { name: aceest-shadow-svc }
-spec:
-  selector: { app: aceest-shadow }
-  ports: [{ name: http, port: 80, targetPort: 5000 }]
+metadata: { name: aceest-v1-svc }
+spec: { selector: { app: aceest-shadow, version: v1 }, ports: [{ port: 80, targetPort: 5000 }] }
 ---
-apiVersion: networking.istio.io/v1beta1
-kind: DestinationRule
-metadata: { name: aceest-shadow-dr }
-spec:
-  host: aceest-shadow-svc
-  subsets:
-    - { name: v1, labels: { version: v1 } }
-    - { name: v2, labels: { version: v2 } }
+apiVersion: v1
+kind: Service
+metadata: { name: aceest-v2-svc }
+spec: { selector: { app: aceest-shadow, version: v2 }, ports: [{ port: 80, targetPort: 5000 }] }
 ---
-apiVersion: networking.istio.io/v1beta1
-kind: VirtualService
-metadata: { name: aceest-shadow-vs }
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aceest-shadow
+  annotations:
+    nginx.ingress.kubernetes.io/mirror-target: "http://aceest-v2-svc.default.svc.cluster.local$request_uri"
+    nginx.ingress.kubernetes.io/mirror-request-body: "on"
 spec:
-  hosts: [aceest-shadow-svc]
-  http:
-    - route: [{ destination: { host: aceest-shadow-svc, subset: v1 } }]
-      mirror: { host: aceest-shadow-svc, subset: v2 }
-      mirrorPercentage: { value: 100.0 }
+  ingressClassName: nginx
+  rules:
+    - host: shadow.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend: { service: { name: aceest-v1-svc, port: { number: 80 } } }

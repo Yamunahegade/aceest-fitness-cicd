@@ -1,0 +1,55 @@
+# Requires Istio: istioctl install --set profile=demo -y ; kubectl label ns default istio-injection=enabled
+# Live traffic -> v1 ; a mirrored copy (responses discarded) -> v2
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: aceest-v1 }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: aceest-shadow, version: v1 } }
+  template:
+    metadata: { labels: { app: aceest-shadow, version: v1 } }
+    spec:
+      containers:
+        - name: app
+          image: yamunahegade/aceest-fitness:1.0.4
+          ports: [{ containerPort: 5000 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: aceest-v2 }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: aceest-shadow, version: v2 } }
+  template:
+    metadata: { labels: { app: aceest-shadow, version: v2 } }
+    spec:
+      containers:
+        - name: app
+          image: yamunahegade/aceest-fitness:1.0.5
+          ports: [{ containerPort: 5000 }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: aceest-shadow-svc }
+spec:
+  selector: { app: aceest-shadow }
+  ports: [{ name: http, port: 80, targetPort: 5000 }]
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata: { name: aceest-shadow-dr }
+spec:
+  host: aceest-shadow-svc
+  subsets:
+    - { name: v1, labels: { version: v1 } }
+    - { name: v2, labels: { version: v2 } }
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata: { name: aceest-shadow-vs }
+spec:
+  hosts: [aceest-shadow-svc]
+  http:
+    - route: [{ destination: { host: aceest-shadow-svc, subset: v1 } }]
+      mirror: { host: aceest-shadow-svc, subset: v2 }
+      mirrorPercentage: { value: 100.0 }

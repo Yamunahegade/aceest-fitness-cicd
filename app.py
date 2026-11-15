@@ -174,7 +174,7 @@ def create_app(db_path=None):
     # ------------------------------------------------------------- basic routes
     @app.route("/")
     def home():
-        return jsonify(service="ACEest Fitness & Gym", status="running", version=VERSION)
+        return jsonify(service="ACEest Fitness & Gym - v2", status="running", version=VERSION)
 
     @app.route("/health")
     def health():
