@@ -17,7 +17,7 @@ pipeline {
         sh '''
           python3 -m venv venv && . venv/bin/activate
           pip install -q -r requirements-dev.txt
-          pytest -q --cov=. --cov-report=xml --junitxml=report.xml
+          pytest -q --cov=app --cov-report=xml --junitxml=report.xml
         '''
       }
       post { always { junit 'report.xml' } }

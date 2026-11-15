@@ -1,6 +1,12 @@
 .git
+legacy
+*.db
+.github
 __pycache__
 *.pyc
 .pytest_cache
-coverage.xml
 venv
+.venv
+Jenkinsfile
+README*.md
+coverage.xml
