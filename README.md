@@ -1,5 +1,7 @@
 # ACEest Fitness & Gym - CI/CD Pipeline (Assignment 2)
 
+**Author:** Yamuna Hegade | **BITS ID:** 2025TM93019 | **Docker Hub:** https://hub.docker.com/r/yamunahegade/aceest-fitness
+
 Flask API (ported from the Assignment 1 desktop versions) delivered through a fully
 automated pipeline: **GitHub -> Jenkins -> Pytest -> SonarQube -> Docker -> Docker Hub -> Kubernetes (Minikube)**.
 
@@ -35,3 +37,12 @@ Deploy (Rolling Update) -> Smoke Test (`/health`). On failure: `kubectl rollout 
 | Canary | Stable (3 replicas) + canary (1 replica) behind one Service (~25%) | Scale canary to 0 |
 | Shadow | NGINX ingress mirrors live traffic to v2, response discarded | Delete the shadow ingress |
 | A/B testing | NGINX ingress routes by header `X-Variant: B` | Delete the variant ingress |
+
+## Evidence (`docs/`)
+| File | Content |
+|---|---|
+| `CI_CD_Report_Yamuna_Hegade_2025TM93019.pdf/.docx` | Final report (2 pages) |
+| `Evidence_Screenshots.docx`, `screenshots/` | Jenkins, SonarQube, Docker Hub, GitHub and every deployment strategy |
+| `sonar-quality-gate.json` | SonarQube Quality Gate export (status OK) |
+
+Docker Hub tags built by Jenkins: `1.0.4`, `1.0.5`, `1.0.6` (plus `1.0.0`, `1.1.0`, `latest`).
